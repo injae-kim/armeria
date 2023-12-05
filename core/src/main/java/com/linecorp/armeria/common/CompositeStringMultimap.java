@@ -23,7 +23,10 @@ import com.google.common.collect.Iterators;
 import com.linecorp.armeria.common.annotation.Nullable;
 import io.netty.handler.codec.DateFormatter;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +50,8 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     private StringMultimap<IN_NAME, NAME> appender;
     @Nullable
     private List<StringMultimap<IN_NAME, NAME>> delegates;
+
+    private final Tombstone<IN_NAME> tombstone = new Tombstone<>();
 
     CompositeStringMultimap(Supplier<StringMultimap<IN_NAME, NAME>> appenderSupplier,
                             List<StringMultimap<IN_NAME, NAME>> parents) {
@@ -101,6 +106,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public String get(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.get(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final String res = delegate.get(name);
             if (res != null) {
@@ -122,6 +131,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public String getLast(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLast(name) : null;
+        }
+
         String getLast = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final String res = delegate.getLast(name);
@@ -143,6 +156,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public List<String> getAll(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getAll(name) : Collections.emptyList();
+        }
+
         final ImmutableList.Builder<String> builder = ImmutableList.builder();
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final List<String> res = delegate.getAll(name);
@@ -157,6 +174,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Boolean getBoolean(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getBoolean(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Boolean res = delegate.getBoolean(name);
             if (res != null) {
@@ -177,6 +198,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Boolean getLastBoolean(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastBoolean(name) : null;
+        }
+
         Boolean getLastBoolean = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Boolean res = delegate.getLastBoolean(name);
@@ -198,6 +223,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Integer getInt(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getInt(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Integer res = delegate.getInt(name);
             if (res != null) {
@@ -218,6 +247,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Integer getLastInt(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastInt(name) : null;
+        }
+
         Integer getLastInt = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Integer res = delegate.getLastInt(name);
@@ -239,6 +272,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLong(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLong(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Long res = delegate.getLong(name);
             if (res != null) {
@@ -259,6 +296,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLastLong(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastLong(name) : null;
+        }
+
         Long getLastLong = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Long res = delegate.getLastLong(name);
@@ -280,6 +321,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Float getFloat(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getFloat(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Float res = delegate.getFloat(name);
             if (res != null) {
@@ -300,6 +345,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Float getLastFloat(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastFloat(name) : null;
+        }
+
         Float getLastFloat = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Float res = delegate.getLastFloat(name);
@@ -321,6 +370,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Double getDouble(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getDouble(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Double res = delegate.getDouble(name);
             if (res != null) {
@@ -341,6 +394,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Double getLastDouble(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastDouble(name) : null;
+        }
+
         Double getLastDouble = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Double res = delegate.getLastDouble(name);
@@ -362,6 +419,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getTimeMillis(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getTimeMillis(name) : null;
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Long res = delegate.getTimeMillis(name);
             if (res != null) {
@@ -382,6 +443,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLastTimeMillis(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.getLastTimeMillis(name) : null;
+        }
+
         Long getLastTimeMillis = null;
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             final Long res = delegate.getLastTimeMillis(name);
@@ -402,6 +467,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean contains(IN_NAME name) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.contains(name);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.contains(name)) {
                 return true;
@@ -414,6 +483,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     public boolean contains(IN_NAME name, String value) {
         requireNonNull(name, "name");
         requireNonNull(value, "value");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.contains(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.contains(name, value)) {
                 return true;
@@ -426,6 +499,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     public boolean containsObject(IN_NAME name, Object value) {
         requireNonNull(name, "name");
         requireNonNull(value, "value");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsObject(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsObject(name, value)) {
                 return true;
@@ -437,6 +514,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsBoolean(IN_NAME name, boolean value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsBoolean(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsBoolean(name, value)) {
                 return true;
@@ -448,6 +529,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsInt(IN_NAME name, int value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsInt(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsInt(name, value)) {
                 return true;
@@ -459,6 +544,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsLong(IN_NAME name, long value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsLong(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsLong(name, value)) {
                 return true;
@@ -470,6 +559,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsFloat(IN_NAME name, float value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsFloat(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsFloat(name, value)) {
                 return true;
@@ -481,6 +574,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsDouble(IN_NAME name, double value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsDouble(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsDouble(name, value)) {
                 return true;
@@ -492,6 +589,10 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsTimeMillis(IN_NAME name, long value) {
         requireNonNull(name, "name");
+        if (tombstone.contains(name)) {
+            return appender != null && appender.containsTimeMillis(name, value);
+        }
+
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             if (delegate.containsTimeMillis(name, value)) {
                 return true;
@@ -506,14 +607,42 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
             size += delegate.size();
         }
-        return size;
+
+        if (tombstone.isEmpty()) {
+            return size;
+        }
+
+        for (IN_NAME name : tombstone.tombstones()) {
+            final Integer cachedRemovedSize = tombstone.getCachedRemovedSize(name);
+            if (cachedRemovedSize != null) {
+                size -= cachedRemovedSize;
+                continue;
+            }
+
+            int removedSize = 0;
+            for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
+                if (parent.contains(name)) {
+                    removedSize += parent.getAll(name).size();
+                }
+            }
+            size -= removedSize;
+            tombstone.cacheRemovedSize(name, removedSize);
+        }
+
+        return Math.max(size, 0);
     }
 
     @Override
     public boolean isEmpty() {
-        for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
-            if (!delegate.isEmpty()) {
-                return false;
+        if (appender != null && !appender.isEmpty()) {
+            return false;
+        }
+
+        for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
+            for (NAME name : parent.names()) {
+                if (!tombstone.contains(name)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -522,10 +651,15 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public final Set<NAME> names() {
         final ImmutableSet.Builder<NAME> builder = ImmutableSet.builder();
-        for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
-            final Set<NAME> res = delegate.names();
-            if (!res.isEmpty()) {
-                builder.addAll(res);
+        if (appender != null && !appender.isEmpty()) {
+            builder.addAll(appender.names());
+        }
+
+        for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
+            for (NAME name : parent.names()) {
+                if (!tombstone.contains(name)) {
+                    builder.add(name);
+                }
             }
         }
         return builder.build();
@@ -533,19 +667,49 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
     @Override
     public Iterator<Entry<NAME, String>> iterator() {
-        return Iterators.concat(delegates().stream().map(StringMultimapGetters::iterator).iterator());
+        final Iterator<Entry<NAME, String>> parentsIterators = Iterators.concat(
+                parents.stream()
+                       .map(StringMultimapGetters::iterator)
+//                       .map(it -> Iterators.filter(it, name -> !tombstone.contains(name)))
+                       .iterator());
+
+        if (appender != null) {
+            return Iterators.concat(appender.iterator(), parentsIterators);
+        }
+        return parentsIterators;
     }
 
     @Override
     public Iterator<String> valueIterator(IN_NAME name) {
-        return Iterators.concat(delegates().stream().map(p -> p.valueIterator(name)).iterator());
+        if (tombstone.contains(name)) {
+            return appender != null ? appender.valueIterator(name) : Collections.emptyIterator();
+        }
+
+        final Iterator<String> parentsIterators = Iterators.concat(
+                parents.stream()
+                       .map(p -> p.valueIterator(name))
+                       .iterator());
+
+        if (appender != null) {
+            return Iterators.concat(appender.valueIterator(name), parentsIterators);
+        }
+        return parentsIterators;
     }
 
     @Override
     public void forEach(BiConsumer<NAME, String> action) {
         requireNonNull(action, "action");
-        for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
-            delegate.forEach(action);
+        if (appender != null) {
+            appender.forEach(action);
+        }
+
+        for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
+            final BiConsumer<NAME, String> filteredAction = (k, v) -> {
+                if (!tombstone.contains(k)) {
+                    action.accept(k, v);
+                }
+            };
+            parent.forEach(filteredAction);
         }
     }
 
@@ -553,8 +717,16 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     public void forEachValue(IN_NAME name, Consumer<String> action) {
         requireNonNull(name, "name");
         requireNonNull(action, "action");
-        for (StringMultimapGetters<IN_NAME, NAME> delegate : delegates()) {
-            delegate.forEachValue(name, action);
+        if (appender != null) {
+            appender.forEachValue(name, action);
+        }
+
+        if (tombstone.contains(name)) {
+            return;
+        }
+
+        for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
+            parent.forEachValue(name, action);
         }
     }
 
@@ -563,14 +735,9 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     final String getAndRemove(IN_NAME name) {
         requireNonNull(name, "name");
-        String getAndRemove = null;
-        for (StringMultimap<IN_NAME, NAME> delegate : delegates()) {
-            final String res = delegate.getAndRemove(name);
-            if (res != null && getAndRemove == null) {
-                getAndRemove = res;
-            }
-        }
-        return getAndRemove;
+        final String get = get(name);
+        remove0(name);
+        return get;
     }
 
     final String getAndRemove(IN_NAME name, String defaultValue) {
@@ -581,14 +748,9 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
     final List<String> getAllAndRemove(IN_NAME name) {
         requireNonNull(name, "name");
-        final ImmutableList.Builder<String> builder = ImmutableList.builder();
-        for (StringMultimap<IN_NAME, NAME> delegate : delegates()) {
-            final List<String> res = delegate.getAllAndRemove(name);
-            if (!res.isEmpty()) {
-                builder.addAll(res);
-            }
-        }
-        return builder.build();
+        final List<String> getAll = getAll(name);
+        remove0(name);
+        return getAll;
     }
 
     @Nullable
@@ -807,22 +969,27 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
     final boolean remove(IN_NAME name) {
         requireNonNull(name, "name");
-        boolean remove = false;
-        for (StringMultimap<IN_NAME, NAME> delegate : delegates()) {
-            remove |= delegate.remove(name);
-        }
+        final boolean remove = contains(name);
+        remove0(name);
         return remove;
     }
 
+    private void remove0(IN_NAME name) {
+        tombstone.add(name);
+        if (appender != null && appender.contains(name)) {
+            appender.remove(name);
+        }
+    }
+
     private void removeAndAppender(IN_NAME name, Consumer<StringMultimap<IN_NAME, NAME>> appenderConsumer) {
-        remove(name);
+        remove0(name);
         appenderConsumer.accept(appender());
     }
 
     private void removeAndAppender(Iterable<? extends Map.Entry<? extends IN_NAME, ?>> entries,
                                    Consumer<StringMultimap<IN_NAME, NAME>> appenderConsumer) {
         for (Map.Entry<? extends IN_NAME, ?> e : entries) {
-            remove(e.getKey());
+            remove0(e.getKey());
         }
         appenderConsumer.accept(appender());
     }
@@ -831,6 +998,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         for (StringMultimap<IN_NAME, NAME> delegate : delegates()) {
             delegate.clear();
         }
+        tombstone.clear();
     }
 
     // Conversion functions
@@ -950,5 +1118,44 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         final int length = sb.length();
         sb.setCharAt(length - 2, ']');
         return sb.substring(0, length - 1);
+    }
+
+    private static final class Tombstone<IN_NAME> {
+
+        private final Set<IN_NAME> tombstones = new HashSet<>();
+        private final Map<IN_NAME, Integer> removedSizeCache = new HashMap<>();
+
+        Tombstone() {}
+
+        Set<IN_NAME> tombstones() {
+            return tombstones;
+        }
+
+        @Nullable
+        Integer getCachedRemovedSize(IN_NAME name) {
+            return removedSizeCache.get(name);
+        }
+
+        void cacheRemovedSize(IN_NAME name, int size) {
+            final int prev = removedSizeCache.getOrDefault(name, 0);
+            removedSizeCache.put(name, prev + size);
+        }
+
+        boolean contains(IN_NAME name) {
+            return tombstones.contains(name);
+        }
+
+        boolean isEmpty() {
+            return tombstones.isEmpty();
+        }
+
+        void add(IN_NAME name) {
+            tombstones.add(name);
+        }
+
+        void clear() {
+            tombstones.clear();
+            removedSizeCache.clear();
+        }
     }
 }
