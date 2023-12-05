@@ -467,6 +467,36 @@ class CompositeStringMultiMapTest {
     }
 
     @Test
+    void iterator_removed() {
+        final CompositeStringMultimap<CharSequence, AsciiString> headers =
+                new CompositeHttpHeadersBase(HttpHeaders.of(),
+                                             HttpHeaders.of("k1", "v1"),
+                                             HttpHeaders.of("k2", "v2",
+                                                            "k3", "v3"),
+                                             HttpHeaders.of("k4", "v4",
+                                                            "k5", "v5",
+                                                            "k6", "v6"),
+                                             HttpHeaders.of("dup", "dup1"),
+                                             HttpHeaders.of("dup", "dup2"),
+                                             HttpHeaders.of());
+        headers.remove("k2");
+        headers.remove("k4");
+        headers.remove("k6");
+        headers.remove("dup");
+        final Iterator<Entry<AsciiString, String>> iterator = headers.iterator();
+        final ImmutableList.Builder<Entry<AsciiString, String>> builder = ImmutableList.builder();
+
+        final List<Entry<AsciiString, String>> expected = builder
+                .add(new SimpleEntry<>(AsciiString.of("k1"), "v1"),
+                     new SimpleEntry<>(AsciiString.of("k3"), "v3"),
+                     new SimpleEntry<>(AsciiString.of("k5"), "v5"))
+                .build();
+        for (int i = 0; iterator.hasNext(); i++) {
+            assertThat(iterator.next()).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test
     void valueIterator() {
         final CompositeStringMultimap<CharSequence, AsciiString> headers =
                 new CompositeHttpHeadersBase(HttpHeaders.of(),
@@ -482,6 +512,34 @@ class CompositeStringMultiMapTest {
         final Iterator<String> valueIterator = headers.valueIterator("k1");
 
         final List<String> expected = ImmutableList.of("v1", "v3", "v5", "dup1", "dup2");
+        for (int i = 0; valueIterator.hasNext(); i++) {
+            assertThat(valueIterator.next()).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test
+    void valueIterator_removed() {
+        final CompositeStringMultimap<CharSequence, AsciiString> headers =
+                new CompositeHttpHeadersBase(HttpHeaders.of(),
+                                             HttpHeaders.of("k1", "v1"),
+                                             HttpHeaders.of("X", "v2",
+                                                            "k1", "v3"),
+                                             HttpHeaders.of("X", "v4",
+                                                            "k1", "v5",
+                                                            "X", "v6"),
+                                             HttpHeaders.of("k1", "dup1"),
+                                             HttpHeaders.of("k1", "dup2"),
+                                             HttpHeaders.of());
+        headers.remove("k1");
+        final Iterator<String> emptyIterator = headers.valueIterator("k1");
+        assertThat(emptyIterator.hasNext()).isFalse();
+
+        headers.add("k1", "v1");
+        headers.add("k1", "v2");
+        headers.add("k1", "v3");
+        final Iterator<String> valueIterator = headers.valueIterator("k1");
+
+        final List<String> expected = ImmutableList.of("v1", "v2", "v3");
         for (int i = 0; valueIterator.hasNext(); i++) {
             assertThat(valueIterator.next()).isEqualTo(expected.get(i));
         }
@@ -992,6 +1050,10 @@ class CompositeStringMultiMapTest {
         headers.remove("k4");
         headers.remove("k6");
         headers.remove("dup");
+        Iterator<Entry<AsciiString, String>> iterator = headers.iterator();
+        while (iterator.hasNext()) {
+            System.err.println(iterator.next());
+        }
         assertThat(headers.toString()).isEqualTo("[k1=v1, k3=v3, k5=v5]");
 
         headers.clear();

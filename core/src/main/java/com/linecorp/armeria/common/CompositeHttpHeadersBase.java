@@ -173,8 +173,8 @@ class CompositeHttpHeadersBase
     public final String toString() {
         final int size = size();
         final boolean isEndOfStream = isEndOfStream();
-        if (size() == 0) {
-            return isEndOfStream() ? "[EOS]" : "[]";
+        if (size == 0) {
+            return isEndOfStream ? "[EOS]" : "[]";
         }
 
         final StringBuilder sb = new StringBuilder(7 + size * 20);

@@ -51,7 +51,8 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     private List<StringMultimap<IN_NAME, NAME>> delegates;
 
-    private final Tombstone<IN_NAME> tombstone = new Tombstone<>();
+    private final Set<IN_NAME> removed = new HashSet<>();
+    private final Map<IN_NAME, Integer> removedSizeCache = new HashMap<>();
 
     CompositeStringMultimap(Supplier<StringMultimap<IN_NAME, NAME>> appenderSupplier,
                             List<StringMultimap<IN_NAME, NAME>> parents) {
@@ -106,7 +107,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public String get(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.get(name) : null;
         }
 
@@ -131,7 +132,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public String getLast(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLast(name) : null;
         }
 
@@ -156,7 +157,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public List<String> getAll(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getAll(name) : Collections.emptyList();
         }
 
@@ -174,7 +175,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Boolean getBoolean(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getBoolean(name) : null;
         }
 
@@ -198,7 +199,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Boolean getLastBoolean(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastBoolean(name) : null;
         }
 
@@ -223,7 +224,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Integer getInt(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getInt(name) : null;
         }
 
@@ -247,7 +248,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Integer getLastInt(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastInt(name) : null;
         }
 
@@ -272,7 +273,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLong(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLong(name) : null;
         }
 
@@ -296,7 +297,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLastLong(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastLong(name) : null;
         }
 
@@ -321,7 +322,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Float getFloat(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getFloat(name) : null;
         }
 
@@ -345,7 +346,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Float getLastFloat(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastFloat(name) : null;
         }
 
@@ -370,7 +371,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Double getDouble(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getDouble(name) : null;
         }
 
@@ -394,7 +395,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Double getLastDouble(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastDouble(name) : null;
         }
 
@@ -419,7 +420,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getTimeMillis(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getTimeMillis(name) : null;
         }
 
@@ -443,7 +444,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Nullable
     public Long getLastTimeMillis(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.getLastTimeMillis(name) : null;
         }
 
@@ -467,7 +468,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean contains(IN_NAME name) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.contains(name);
         }
 
@@ -483,7 +484,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     public boolean contains(IN_NAME name, String value) {
         requireNonNull(name, "name");
         requireNonNull(value, "value");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.contains(name, value);
         }
 
@@ -499,7 +500,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     public boolean containsObject(IN_NAME name, Object value) {
         requireNonNull(name, "name");
         requireNonNull(value, "value");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsObject(name, value);
         }
 
@@ -514,7 +515,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsBoolean(IN_NAME name, boolean value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsBoolean(name, value);
         }
 
@@ -529,7 +530,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsInt(IN_NAME name, int value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsInt(name, value);
         }
 
@@ -544,7 +545,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsLong(IN_NAME name, long value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsLong(name, value);
         }
 
@@ -559,7 +560,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsFloat(IN_NAME name, float value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsFloat(name, value);
         }
 
@@ -574,7 +575,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsDouble(IN_NAME name, double value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsDouble(name, value);
         }
 
@@ -589,7 +590,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     @Override
     public boolean containsTimeMillis(IN_NAME name, long value) {
         requireNonNull(name, "name");
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null && appender.containsTimeMillis(name, value);
         }
 
@@ -608,12 +609,12 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
             size += delegate.size();
         }
 
-        if (tombstone.isEmpty()) {
+        if (removed.isEmpty()) {
             return size;
         }
 
-        for (IN_NAME name : tombstone.tombstones()) {
-            final Integer cachedRemovedSize = tombstone.getCachedRemovedSize(name);
+        for (IN_NAME name : removed) {
+            final Integer cachedRemovedSize = removedSizeCache.get(name);
             if (cachedRemovedSize != null) {
                 size -= cachedRemovedSize;
                 continue;
@@ -626,7 +627,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
                 }
             }
             size -= removedSize;
-            tombstone.cacheRemovedSize(name, removedSize);
+            removedSizeCache.put(name, removedSize);
         }
 
         return Math.max(size, 0);
@@ -640,7 +641,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
         for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
             for (NAME name : parent.names()) {
-                if (!tombstone.contains(name)) {
+                if (!removed.contains(name.toString())) {
                     return false;
                 }
             }
@@ -657,7 +658,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
         for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
             for (NAME name : parent.names()) {
-                if (!tombstone.contains(name)) {
+                if (!removed.contains(name.toString())) {
                     builder.add(name);
                 }
             }
@@ -670,30 +671,22 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         final Iterator<Entry<NAME, String>> parentsIterators = Iterators.concat(
                 parents.stream()
                        .map(StringMultimapGetters::iterator)
-//                       .map(it -> Iterators.filter(it, name -> !tombstone.contains(name)))
+                       .map(it -> Iterators.filter(it, entry -> !removed.contains(entry.getKey().toString())))
                        .iterator());
 
-        if (appender != null) {
-            return Iterators.concat(appender.iterator(), parentsIterators);
+        if (appender == null) {
+            return parentsIterators;
         }
-        return parentsIterators;
+        return Iterators.concat(appender.iterator(), parentsIterators);
     }
 
     @Override
     public Iterator<String> valueIterator(IN_NAME name) {
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return appender != null ? appender.valueIterator(name) : Collections.emptyIterator();
         }
 
-        final Iterator<String> parentsIterators = Iterators.concat(
-                parents.stream()
-                       .map(p -> p.valueIterator(name))
-                       .iterator());
-
-        if (appender != null) {
-            return Iterators.concat(appender.valueIterator(name), parentsIterators);
-        }
-        return parentsIterators;
+        return getAll(name).iterator();
     }
 
     @Override
@@ -705,7 +698,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
 
         for (StringMultimapGetters<IN_NAME, NAME> parent : parents) {
             final BiConsumer<NAME, String> filteredAction = (k, v) -> {
-                if (!tombstone.contains(k)) {
+                if (!removed.contains(k.toString())) {
                     action.accept(k, v);
                 }
             };
@@ -721,7 +714,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
             appender.forEachValue(name, action);
         }
 
-        if (tombstone.contains(name)) {
+        if (removed.contains(name)) {
             return;
         }
 
@@ -975,7 +968,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
     }
 
     private void remove0(IN_NAME name) {
-        tombstone.add(name);
+        removed.add(name);
         if (appender != null && appender.contains(name)) {
             appender.remove(name);
         }
@@ -998,7 +991,7 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         for (StringMultimap<IN_NAME, NAME> delegate : delegates()) {
             delegate.clear();
         }
-        tombstone.clear();
+        removed.clear();
     }
 
     // Conversion functions
@@ -1118,44 +1111,5 @@ abstract class CompositeStringMultimap<IN_NAME extends CharSequence, NAME extend
         final int length = sb.length();
         sb.setCharAt(length - 2, ']');
         return sb.substring(0, length - 1);
-    }
-
-    private static final class Tombstone<IN_NAME> {
-
-        private final Set<IN_NAME> tombstones = new HashSet<>();
-        private final Map<IN_NAME, Integer> removedSizeCache = new HashMap<>();
-
-        Tombstone() {}
-
-        Set<IN_NAME> tombstones() {
-            return tombstones;
-        }
-
-        @Nullable
-        Integer getCachedRemovedSize(IN_NAME name) {
-            return removedSizeCache.get(name);
-        }
-
-        void cacheRemovedSize(IN_NAME name, int size) {
-            final int prev = removedSizeCache.getOrDefault(name, 0);
-            removedSizeCache.put(name, prev + size);
-        }
-
-        boolean contains(IN_NAME name) {
-            return tombstones.contains(name);
-        }
-
-        boolean isEmpty() {
-            return tombstones.isEmpty();
-        }
-
-        void add(IN_NAME name) {
-            tombstones.add(name);
-        }
-
-        void clear() {
-            tombstones.clear();
-            removedSizeCache.clear();
-        }
     }
 }
